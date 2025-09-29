@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Birthday Wish</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* Changed overflow to allow scrolling up and down */
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .font-cursive {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        /* --- Background Animation --- */
+        .gradient-bg {
+            background: linear-gradient(300deg, #f8cdda, #cda4de, #8a43a8);
+            background-size: 180% 180%;
+            animation: gradient-animation 18s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- Floating Hearts --- */
+        .hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50% 50% 0 0;
+            transform: rotate(-45deg);
+            animation: float 15s infinite linear;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+        .heart::before { top: -10px; left: 0; }
+        .heart::after { top: 0; left: 10px; }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(-45deg) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(-45deg) scale(1.5); opacity: 0; }
+        }
+
+        /* --- Initial Animation & Sequencing --- */
+        .hidden-start {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* --- Slideshow Animations --- */
+        .slideshow-container {
+            perspective: 1000px;
+        }
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            transition: transform 1s, opacity 1s;
+            opacity: 0;
+            transform: rotateY(180deg) scale(0.8);
+        }
+        .slide.active {
+            opacity: 1;
+            transform: rotateY(0) scale(1);
+        }
+        .slide.exiting {
+            opacity: 0;
+            transform: rotateY(-180deg) scale(0.8);
+        }
+
+        /* --- Final Message Glow --- */
+        .glowing-text {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ffdeeb, 0 0 20px #ffdeeb; }
+            to { text-shadow: 0 0 10px #fff, 0 0 20px #ffdeeb, 0 0 30px #f8cdda, 0 0 40px #f8cdda; }
+        }
+
+        /* --- Button Pulse --- */
+        #revealButton {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 222, 235, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 222, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 222, 235, 0); }
+        }
+        
+        /* --- Typing Effect Styles --- */
+        #typing-message {
+            white-space: pre-wrap; /* This helps preserve line breaks from the JS string */
+            min-height: 250px; /* Adjust as needed to prevent layout shifts */
+        }
+        .blinking-cursor {
+            font-weight: bold;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center text-white">
+
+    <div class="hearts-container" id="hearts-container"></div>
+
+    <div id="content-container" class="relative z-10 text-center p-4 w-full my-12">
+
+        <!-- Initial Button -->
+        <div id="initialView" class="flex flex-col items-center">
+            <h1 class="font-cursive text-4xl sm:text-5xl md:text-7xl mb-4" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.4);">A little surprise for you...</h1>
+            <p class="mb-8 text-lg md:text-xl">Are you ready?</p>
+            <button id="revealButton" class="bg-white text-pink-500 font-bold py-3 px-8 rounded-full shadow-lg transition-transform duration-300 hover:scale-110">
+                Click Me!
+            </button>
+        </div>
+
+        <!-- Main Content (hidden initially) -->
+        <main id="mainContent" class="hidden w-full max-w-4xl mx-auto">
+            
+            <!-- Happy Birthday Title -->
+            <div id="title" class="hidden-start mb-8">
+                <h1 class="font-cursive text-5xl sm:text-6xl md:text-8xl lg:text-9xl glowing-text">Happy Birthday</h1>
+                <h2 class="text-2xl md:text-4xl mt-2 font-light">My Dearest <span class="font-bold">Nandu</span>!</h2>
+            </div>
+            
+            <!-- Photo Slideshow -->
+            <div id="slideshow" class="hidden-start my-8 md:my-12">
+                <div class="slideshow-container relative w-full max-w-md mx-auto aspect-square bg-black/20 rounded-2xl shadow-2xl p-3 backdrop-blur-sm">
+                    <div id="slide1" class="slide active">
+                        <img src="" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://placehold.co/400x400/f8cdda/6b21a8?text=Photo+1'">
+                    </div>
+                    <div id="slide2" class="slide">
+                        <img src="" alt="Birthday memory photo 2" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://placehold.co/400x400/cda4de/6b21a8?text=Photo+2'">
+                    </div>
+                    <div id="slide3" class="slide">
+                        <img src="" alt="Birthday memory photo 3" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://placehold.co/400x400/8a43a8/f8cdda?text=Photo+3'">
+                    </div>
+                    <div id="slide4" class="slide">
+                        <img src="" alt="Birthday memory photo 4" class="w-full h-full object-cover rounded-lg" onerror="this.src='https://placehold.co/400x400/6b21a8/f8cdda?text=Photo+4'">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Birthday Message -->
+            <div id="message" class="hidden-start max-w-2xl mx-auto">
+                <div class="bg-black/20 p-6 rounded-2xl shadow-2xl backdrop-blur-sm">
+                    <!-- This paragraph will be filled by the typing animation -->
+                    <p id="typing-message" class="text-lg md:text-xl leading-relaxed"></p>
+                    
+                    <p class="mt-6 text-xl md:text-2xl font-cursive glowing-text">
+                        With all my love,
+                        <br>
+                        <span class="font-sans font-bold not-italic">Giri</span>
+                    </p>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const revealButton = document.getElementById('revealButton');
+            const initialView = document.getElementById('initialView');
+            const mainContent = document.getElementById('mainContent');
+            
+            const title = document.getElementById('title');
+            const slideshow = document.getElementById('slideshow');
+            const message = document.getElementById('message');
+            const typingTextElement = document.getElementById('typing-message');
+
+            // --- Typing Effect Logic ---
+            const fullMessage = `Happy Birthday Nandu💞 i wish you the happiness and love 💓 ur my replaceable bestie of my life ever⚡and u want to happy with ur whole life and I don't know how much I attached to you ♾️ and we have a good bonding i think .......
+
+And I have the beautiful memories with you❣️🧿
+And I missing you so much in this 8 month's 🥺 u didn't know that how much I missed you 🥺......
+
+Missing you Nandu🥺💞......`;
+
+            let charIndex = 0;
+            function typeWriter() {
+                if (charIndex < fullMessage.length) {
+                    typingTextElement.textContent += fullMessage.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, 55); // Adjust typing speed here (milliseconds)
+                } else {
+                    // Add a blinking cursor at the end
+                    typingTextElement.innerHTML += '<span class="blinking-cursor">|</span>';
+                }
+            }
+
+            revealButton.addEventListener('click', () => {
+                initialView.style.transition = 'opacity 0.5s, transform 0.5s';
+                initialView.style.opacity = '0';
+                initialView.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    initialView.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    
+                    // Animate elements in sequence
+                    setTimeout(() => title.classList.add('fade-in-up'), 100);
+                    setTimeout(() => slideshow.classList.add('fade-in-up'), 800);
+                    setTimeout(() => {
+                        message.classList.add('fade-in-up');
+                        // Start the typing animation once the message box appears
+                        typeWriter();
+                    }, 1500);
+                    
+                }, 500);
+            });
+
+            // --- Slideshow logic ---
+            let currentSlide = 1;
+            const totalSlides = 4;
+
+            setInterval(() => {
+                const exitingSlide = document.getElementById(`slide${currentSlide}`);
+                currentSlide = (currentSlide % totalSlides) + 1;
+                const activeSlide = document.getElementById(`slide${currentSlide}`);
+
+                if (exitingSlide && activeSlide) {
+                    exitingSlide.classList.remove('active');
+                    exitingSlide.classList.add('exiting');
+                    
+                    setTimeout(() => {
+                         // Reset the exiting slide after transition
+                        exitingSlide.classList.remove('exiting');
+                    }, 1000);
+
+                    activeSlide.classList.add('active');
+                }
+            }, 4000); // Change image every 4 seconds
+
+            // --- Floating hearts logic ---
+            const heartsContainer = document.getElementById('hearts-container');
+            const heartCount = 20;
+
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = `${Math.random() * 100}vw`;
+                heart.style.animationDuration = `${5 + Math.random() * 10}s`;
+                heart.style.animationDelay = `${Math.random() * 5}s`;
+                heart.style.transform = `scale(${0.5 + Math.random()})`
+                heartsContainer.appendChild(heart);
+            }
+        });
+    </script>
+</body>
+</html>
